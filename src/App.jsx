@@ -50,11 +50,20 @@ function App() {
           setProducts(data)
         }
       } else {
-        setError('Failed to load products. Please check if the server is running.')
+        let errorMessage = 'Failed to load products. Please check if the server is running.';
+        try {
+          const errorData = await response.json();
+          if (errorData.error) {
+            errorMessage = `Server Error: ${errorData.error}`;
+          }
+        } catch (e) {
+          console.error('Error parsing error response:', e);
+        }
+        setError(errorMessage);
       }
     } catch (error) {
       console.error('Error fetching products:', error)
-      setError('Cannot connect to server. Make sure the backend server is running on port 5000.')
+      setError('Cannot connect to server. Please check your network connection.')
     } finally {
       setLoading(false)
     }
