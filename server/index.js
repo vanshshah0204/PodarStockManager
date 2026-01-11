@@ -14,16 +14,19 @@ app.use(express.json())
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/podarstock'
 
-let isConnected = false;
-
 const connectToDatabase = async () => {
-  if (isConnected) {
+  if (mongoose.connection.readyState === 1) {
     return;
   }
 
   try {
-    await mongoose.connect(MONGODB_URI);
-    isConnected = true;
+    if (!process.env.MONGODB_URI && process.env.VERCEL) {
+       throw new Error('MONGODB_URI is not defined in Vercel environment variables.');
+    }
+
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000, // Fail after 5 seconds if can't connect
+    });
     console.log('Connected to MongoDB');
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
@@ -37,7 +40,11 @@ app.use(async (req, res, next) => {
     await connectToDatabase();
     next();
   } catch (error) {
-    res.status(500).json({ error: 'Database connection failed' });
+    console.error('Database middleware error:', error);
+    res.status(500).json({ 
+      error: 'Database connection failed', 
+      details: error.message 
+    });
   }
 });
 

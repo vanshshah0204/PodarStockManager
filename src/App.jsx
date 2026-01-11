@@ -55,6 +55,9 @@ function App() {
           const errorData = await response.json();
           if (errorData.error) {
             errorMessage = `Server Error: ${errorData.error}`;
+            if (errorData.details) {
+              errorMessage += ` (${errorData.details})`;
+            }
           }
         } catch (e) {
           console.error('Error parsing error response:', e);
