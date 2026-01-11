@@ -219,16 +219,27 @@ function App() {
         setExpandedCategory(category)
       }
     }
+    // Close mobile menu when a category is selected (optional, depends on UX preference)
+    // setIsMobileMenuOpen(false) 
   }
 
   const handleSubcategoryClick = (subcategory) => {
     setSelectedSubcategory(subcategory)
+    setIsMobileMenuOpen(false) // Close menu on selection
   }
 
   return (
     <div className="app">
-      <div className="sidebar">
-        <h2>Categories</h2>
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="mobile-menu-overlay" onClick={() => setIsMobileMenuOpen(false)}></div>
+      )}
+
+      <div className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+        <div className="sidebar-header">
+          <h2>Categories</h2>
+          <button className="close-sidebar-btn" onClick={() => setIsMobileMenuOpen(false)}>×</button>
+        </div>
         <ul className="category-list">
           {categories.map(category => (
             <li key={category}>
@@ -268,9 +279,15 @@ function App() {
       </div>
       
       <div className="main-content">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+        <div className="header-container">
+          <button 
+            className="mobile-menu-btn"
+            onClick={() => setIsMobileMenuOpen(true)}
+          >
+            ☰
+          </button>
           <h1>Podar Stock Manager</h1>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div className="header-actions">
             <button 
               className="btn-add"
               onClick={() => setShowAddForm(true)}
