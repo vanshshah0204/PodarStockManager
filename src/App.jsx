@@ -11,6 +11,7 @@ function App() {
   const [error, setError] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
   const [expandedCategory, setExpandedCategory] = useState(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [newProduct, setNewProduct] = useState({
     name: '',
