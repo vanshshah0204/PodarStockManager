@@ -19,6 +19,7 @@ function App() {
     size: '',
     stock: 0
   })
+  const [editedStocks, setEditedStocks] = useState({})
 
   const categories = ['All', 'Uniforms', 'Books']
   
@@ -171,6 +172,50 @@ function App() {
       }
     } catch (error) {
       console.error('Error updating stock:', error)
+    }
+  }
+
+  const updateStock = async (id, value) => {
+    const n = Math.max(0, parseInt(value))
+    if (Number.isNaN(n)) return
+    try {
+      const response = await fetch(`${API_URL}/products/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ stock: n })
+      })
+      if (response.ok) {
+        const updatedProduct = await response.json()
+        setProducts(products.map(p => p._id === id ? updatedProduct : p))
+        setEditedStocks(prev => {
+          const next = { ...prev }
+          delete next[id]
+          return next
+        })
+      }
+    } catch (error) {
+      console.error('Error updating stock:', error)
+    }
+  }
+
+  const handleStockInputChange = (id, v) => {
+    const filtered = v.replace(/[^\d]/g, '')
+    setEditedStocks(prev => ({ ...prev, [id]: filtered }))
+  }
+
+  const handleStockInputKeyDown = (id, e) => {
+    if (e.key === 'Enter') {
+      updateStock(id, editedStocks[id] ?? '')
+    }
+    if (e.key === 'Escape') {
+      setEditedStocks(prev => {
+        const next = { ...prev }
+        delete next[id]
+        return next
+      })
+      e.currentTarget.blur()
     }
   }
 
@@ -410,7 +455,15 @@ function App() {
                   >
                     -
                   </button>
-                  <span className="stock-value">{product.stock}</span>
+                  <input
+                    className="stock-input"
+                    type="number"
+                    min="0"
+                    value={editedStocks[product._id] !== undefined ? editedStocks[product._id] : String(product.stock)}
+                    onChange={(e) => handleStockInputChange(product._id, e.target.value)}
+                    onBlur={() => updateStock(product._id, editedStocks[product._id] ?? product.stock)}
+                    onKeyDown={(e) => handleStockInputKeyDown(product._id, e)}
+                  />
                   <button 
                     className="btn-increase" 
                     onClick={() => increaseStock(product._id)}
